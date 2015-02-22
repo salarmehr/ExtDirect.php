@@ -60,35 +60,21 @@ It includes:
 Features
 --------
 - API declaration with several classes (not limited to a single class)
-
 - API "url", "namespace" and "descriptor" settings ("ExtDirect" class assigns them automatically if you don't)
-
 - Two types of API output format: "json" (for use with Ext Designer) and "javascript" (default: json)
-
 - You choose if the "len" attribute of the actions will count only the required parameters of the PHP method, or all of them (default: all)
-
 - You choose whether inherited methods will be declared in the API or not (default: no)
-
 - You choose whether static methods will be declared in the API or not (default: no)
-
 - Instantiate an object if the called method is static? You choose! (default: no)
-
 - Call the class constructor with the actions parameters? You choose! (default: no)
-
 - "debug" option to enable server exceptions to be sent in the output of API action results (default: off)
-
 - "utf8_encode" option to automatically apply UTF8 encoding in API action results (default: off)
 - Handles forms
 - Handles file uploads
-
 Configuration - How To
 ----------------------
-
 Easy.
-
 If the configuration option name is "configuration_name" and the configuration value is $value, use this syntax:
-
-PHP Code:
 
     ExtDirect::$configuration_name = $value;  
 
@@ -104,7 +90,7 @@ Now, let's see the available configuration options:
 - example
 PHP Code:
 
-    ExtDirect::$api_classes = array( 'Server', 'OtherClass',  'StoreProvider' );  
+     ExtDirect::$api_classes = array( 'Server', 'OtherClass',  'StoreProvider' );  
 
 - name: url
 - type: string
@@ -186,7 +172,7 @@ ExtDirect::$utf8_encode = true;
 - type: string
 - meaning: API output format - available options are "json" (good for Ext Designer) and "javascript"
 - default: "json"
-- comments: Another way to enforce "javascript" output is to append the "?javascript" query string in the end of your PHP script URL; do this in the HTML <script> tag that refers to your API
+- comments: Another way to enforce "javascript" output is to append the "?javascript" query string in the end of your PHP script URL; do this in the HTML `<script>` tag that refers to your API
 example
 PHP Code:
 ExtDirect::$default_api_output = "javascript";  
@@ -213,24 +199,24 @@ Method 2: include "@formHandler" in the DOC comment of the method.
 
 Example:
 
-PHP Code:
-class FTP_Manager
-{
-    /**
-     * Sets FTP password for a specific account
-     * 
-     * @formHandler
-     * @param string $account   Name of the account
-     * @param string $password   New password
-     * @param string $password_confirm   New password confirmation
-     * @return string
-     */
-    public function set_ftp_password( $account, $password, $password_confirm )
-    {
-        // do stuff
-        return $result;
-    }
-}  
+      class FTP_Manager
+      {
+          /**
+           * Sets FTP password for a specific account
+           * 
+           * @formHandler
+           * @param string $account   Name of the account
+           * @param string $password   New password
+           * @param string $password_confirm   New password confirmation
+           * @return string
+           */
+          public function set_ftp_password( $account, $password, $password_confirm )
+          {
+              // do stuff
+              return $result;
+          }
+      }  
+      
 In the example above, due to the "@formHandler" string inside the method's DOC comment, it will be flagged as a "formHandler" method.
 
 It has the same effect as this:
@@ -248,9 +234,11 @@ I will use the "set_ftp_password" method above as the example.
 First, note that we don't want that all formHandler methods have the same not-friendly signature, like this:
 
 PHP Code:
-function set_ftp_password( $data );
-function do_something( $data );
-function do_something_completely_different( $data );  
+
+        function set_ftp_password( $data );
+        function do_something( $data );
+        function do_something_completely_different( $data );  
+
 Where $data is the user input (usually $_POST)
 
 So, to be able to keep normal method signatures, like this...
