@@ -3,11 +3,13 @@
 <head>
     <title>Ext.Direct Example</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <script type="text/javascript" src="http://extjs.cachefly.net/ext-3.2.1/adapter/ext/ext-base.js"></script>
-    <script type="text/javascript" src="http://extjs.cachefly.net/ext-3.2.1/ext-all.js"></script>
-    <script type="text/javascript" src="example.php?javascript"></script>
+    <script type="text/javascript" src="http://extjs.cachefly.net/ext-3.4.0/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="http://extjs.cachefly.net/ext-3.4.0/ext-all.js"></script>
+    <script type="text/javascript" src="example.php"></script>
     <script type="text/javascript">
         Ext.onReady(function () {
+            Ext.Direct.addProvider(window.uERP_REMOTING_API);
+
             Ext.php.Server.date('Y-m-d', function (result) {
                 alert('Server date is ' + result);
             });

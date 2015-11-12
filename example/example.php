@@ -1,15 +1,7 @@
 <?php
+require_once __DIR__ . '/../vendor/autoload.php';
 
-require 'ExtDirect.php';
+$config = new ExtDirect\Config(include __DIR__ . '/config/extdirect.php');
 
-class Server
-{
-    public function date( $format )
-    {
-        return date( $format );
-    }
-}
-
-ExtDirect::provide( 'Server' );
-
-?>
+$discoverer = new ExtDirect\Discoverer($config);
+$discoverer->start();
