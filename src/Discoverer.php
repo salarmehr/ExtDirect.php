@@ -63,38 +63,38 @@ class Discoverer
     }
 
     /**
-     * @param \ReflectionClass $class
+     * @param \ReflectionClass $reflectedClass
      * @return array
      */
-    public function getActions(\ReflectionClass $class)
+    public function getMethods(\ReflectionClass $reflectedClass)
     {
-        $actions = [];
+        $methods = [];
 
-        foreach($class->getMethods() as $method) {
-            if (false === $method->isPublic()) {
+        foreach($reflectedClass->getMethods() as $reflectedMethod) {
+            if (false === $reflectedMethod->isPublic()) {
                 continue;
             }
 
-            if ($method->isConstructor() || $method->isDestructor() || $method->isAbstract()) {
+            if ($reflectedMethod->isConstructor() || $reflectedMethod->isDestructor() || $reflectedMethod->isAbstract()) {
                 continue;
             }
 
-            $methodAnnotations = AnnotationsParser::getAll($method);
+            $methodAnnotations = AnnotationsParser::getAll($reflectedMethod);
             if (false === isset($methodAnnotations['ExtDirect'])) {
                 continue;
             }
-            $action = [
-                'name' => $method->getName(),
-                'len' => $method->getNumberOfParameters()
+            $method = [
+                'name' => $reflectedMethod->getName(),
+                'len' => $reflectedMethod->getNumberOfParameters()
             ];
 
             if (isset($methodAnnotations['ExtDirect\FormHandler'])) {
-                $action['formHandler'] = true;
+                $method['formHandler'] = true;
             }
 
-            $actions[] = $action;
+            $methods[] = $method;
         }
-        return $actions;
+        return $methods;
     }
 
     /**
@@ -135,7 +135,7 @@ class Discoverer
                     }
                 }
 
-                $actions[$classAlias ?: $className] = $this->getActions($class);
+                $actions[$classAlias ?: $className] = $this->getMethods($class);
             }
         }
 
