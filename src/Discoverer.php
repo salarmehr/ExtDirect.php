@@ -6,6 +6,8 @@ use Psr\Http\Message\ResponseInterface;
 use Zend\Diactoros\Response\EmitterInterface;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Response\SapiEmitter;
+use Doctrine\Common\Cache\CacheProvider;
+use Doctrine\Common\Cache\FilesystemCache;
 
 
 /**
@@ -100,10 +102,10 @@ class Discoverer
      *
      * @return array
      */
-    public function loadPaths()
+    public function parseClasses()
     {
         $paths = $this->config->getDiscovererPaths();
-        $files = $classes = $actions = [];
+        $files = $classes = $actions = $classMap = [];
         foreach ($paths as $path) {
             $files = array_merge($files, $this->loadDir($path));
         }
@@ -115,20 +117,32 @@ class Discoverer
             require_once $file;
             foreach ($classes as $className) {
                 $class = new \ReflectionClass($className);
-                if (false === $class->isInstantiable()) {
+                if (!$class->isInstantiable()) {
                     continue;
                 }
 
                 $classAnnotations = AnnotationsParser::getAll($class);
-                if (false === isset($classAnnotations['ExtDirect'])) {
+                if (!isset($classAnnotations['ExtDirect'])) {
                     continue;
                 }
 
-                $actions[$className] = $this->getActions($class);
+                $classAlias = null;
+                if (isset($classAnnotations['ExtDirect\Alias'])) {
+                    if (is_array($classAnnotations['ExtDirect\Alias']) &&
+                        is_string($classAnnotations['ExtDirect\Alias'][0])) {
+                        $classAlias = $classAnnotations['ExtDirect\Alias'][0];
+                        $classMap[$classAlias] = $className;
+                    }
+                }
+
+                $actions[$classAlias ?: $className] = $this->getActions($class);
             }
         }
 
-        return $actions;
+        return [
+            'actions' => $actions,
+            'classMap' => $classMap
+        ];
     }
 
     /**
@@ -166,19 +180,38 @@ class Discoverer
      *
      * @param ResponseInterface|null $response
      * @param EmitterInterface|null $emitter
+     * @param CacheProvider|null $cache
      * @return array
      */
     public function start(ResponseInterface $response = null,
-                             EmitterInterface $emitter = null)
+                          EmitterInterface $emitter = null,
+                          CacheProvider $cache = null)
     {
+        $cacheDir = $this->config->getCacheDirectory();
+        $cacheKey = $this->config->getApiProperty('id');
+        $cacheLifetime = $this->config->getCacheLifetime();
+
         $response = $response ?: new Response();
         $emitter  = $emitter ?: new SapiEmitter();
+        $cache  = $cache ?: new FilesystemCache($cacheDir);
 
-        $actions = $this->loadPaths();
-        $api = $this->getApi($actions);
+        $parsedData = $this->parseClasses();
+
+        if ($cache->contains($cacheKey)) {
+            $cachedData = $cache->fetch($cacheKey);
+
+            $api = $cachedData['api'];
+        } else {
+            $api = $this->getApi($parsedData['actions']);
+
+            $cache->save($cacheKey, [
+                'classMap' => $parsedData['classMap'],
+                'api' => $api
+            ], $cacheLifetime);
+        }
 
         $body = sprintf('%s = %s;',
-            $this->config->getApi()['descriptor'],
+            $this->config->getApiDescriptor(),
             json_encode($api, \JSON_UNESCAPED_UNICODE));
 
         $response->getBody()->write($body);
