@@ -1,8 +1,11 @@
 <?php
+namespace Util;
+
 /**
  * Class Server
  *
  * @ExtDirect
+ * @ExtDirect\Alias UtilServer
  */
 class Server
 {
