@@ -24,6 +24,7 @@ return [
             'origin'           => true,
         ],
         'requestCredentialsSupported' => true,
+        'checkHost' => true,
         'serverOrigin' => [
             'scheme' => 'http',
             'host'   => 'localhost',
