@@ -131,11 +131,16 @@ class Discoverer
                     if (is_array($classAnnotations['ExtDirect\Alias']) &&
                         is_string($classAnnotations['ExtDirect\Alias'][0])) {
                         $classAlias = $classAnnotations['ExtDirect\Alias'][0];
-                        $classMap[$classAlias] = $className;
                     }
                 }
 
-                $actions[$classAlias ?: $className] = $this->getMethods($class);
+                $actionName = $classAlias ?: $className;
+
+                $classMap[$actionName]['action'] = $actionName;
+                $classMap[$actionName]['class'] = $className;
+                $classMap[$actionName]['file'] = $file;
+
+                $actions[$actionName] = $this->getMethods($class);
             }
         }
 
@@ -177,7 +182,6 @@ class Discoverer
 
     /**
      *
-     *
      * @param ResponseInterface|null $response
      * @param EmitterInterface|null $emitter
      * @param CacheProvider|null $cache
@@ -193,7 +197,7 @@ class Discoverer
 
         $response = $response ?: new Response();
         $emitter  = $emitter ?: new SapiEmitter();
-        $cache  = $cache ?: new FilesystemCache($cacheDir);
+        $cache    = $cache ?: new FilesystemCache($cacheDir);
 
         $parsedData = $this->parseClasses();
 
