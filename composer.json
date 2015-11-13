@@ -13,7 +13,8 @@
     "nette/reflection": "^2.3",
     "zendframework/zend-diactoros": "^1.1",
     "doctrine/cache": "^1.5",
-    "neomerx/cors-psr7": "^0.2.0"
+    "neomerx/cors-psr7": "^0.2.0",
+    "zendframework/zend-stratigility": "^1.1"
   },
   "autoload": {
     "psr-4": { "ExtDirect\\": "src/" }
