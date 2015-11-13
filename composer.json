@@ -1,7 +1,7 @@
 {
-  "name": "danielbragalmeida/ext-direct",
+  "name": "danielbragalmeida/extdirect",
   "type": "library",
-  "description": "An implementation of the Ext Direct Specification",
+  "description": "An PHP implementation of the Ext Direct Specification",
   "keywords": ["sencha", "extjs", "direct"],
   "homepage": "http://docs.sencha.com/extjs/6.0/backend_connectors/direct/specification.html",
   "license": "MIT",
