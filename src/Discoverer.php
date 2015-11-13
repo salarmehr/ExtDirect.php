@@ -22,6 +22,11 @@ class Discoverer
     protected $config;
 
     /**
+     * @var ResponseInterface
+     */
+    protected $response;
+
+    /**
      * Discoverer constructor.
      * @param Config $config
      */
@@ -45,6 +50,14 @@ class Discoverer
         }
 
         $this->config = $config;
+    }
+
+    /**
+     * @return ResponseInterface
+     */
+    public function getResponse()
+    {
+        return $this->response;
     }
 
     /**
@@ -185,12 +198,10 @@ class Discoverer
      * Start discovery process
      *
      * @param ResponseInterface|null $response
-     * @param EmitterInterface|null $emitter
      * @param CacheProvider|null $cache
      * @return array
      */
     public function start(ResponseInterface $response = null,
-                          EmitterInterface $emitter = null,
                           CacheProvider $cache = null)
     {
         $cacheDir = $this->config->getCacheDirectory();
@@ -198,7 +209,6 @@ class Discoverer
         $cacheLifetime = $this->config->getCacheLifetime();
 
         $response = $response ?: new Response();
-        $emitter  = $emitter ?: new SapiEmitter();
         $cache    = $cache ?: new FilesystemCache($cacheDir);
 
         if ($cache->contains($cacheKey)) {
@@ -216,6 +226,15 @@ class Discoverer
 
         $response->getBody()->write($body);
 
-        $emitter->emit($response->withHeader('Content-Type', 'text/javascript'));
+        $this->response = $response->withHeader('Content-Type', 'text/javascript');
+    }
+
+    /**
+     * @param EmitterInterface|null $emitter
+     */
+    public function output(EmitterInterface $emitter = null)
+    {
+        $emitter = $emitter ?: new SapiEmitter();
+        $emitter->emit($this->getResponse());
     }
 }
