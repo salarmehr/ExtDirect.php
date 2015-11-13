@@ -28,6 +28,11 @@ class Router
     protected $config;
 
     /**
+     * @var ResponseInterface
+     */
+    protected $response;
+
+    /**
      * Discoverer constructor.
      * @param Config $config
      */
@@ -51,6 +56,14 @@ class Router
         }
 
         $this->config = $config;
+    }
+
+    /**
+     * @return ResponseInterface
+     */
+    public function getResponse()
+    {
+        return $this->response;
     }
 
     /**
@@ -150,17 +163,17 @@ class Router
     }
 
     /**
-     *
+     * Route using CORS analyzer
      *
      * @param RequestInterface|null $request
      * @param ResponseInterface|null $response
-     * @param EmitterInterface|null $emitter
      * @param CacheProvider|null $cache
+     * @param SettingsStrategyInterface $corsSettings
+     * @param AnalyzerInterface $corsAnalyzer
      * @return array
      */
-    public function route(RequestInterface $request = null,
+    public function routeWithCors(RequestInterface $request = null,
                           ResponseInterface $response = null,
-                          EmitterInterface $emitter = null,
                           CacheProvider $cache = null,
                           SettingsStrategyInterface $corsSettings = null,
                           AnalyzerInterface $corsAnalyzer = null)
@@ -171,7 +184,6 @@ class Router
 
         $request  = $request ?: ServerRequestFactory::fromGlobals();
         $response = $response ?: new Response();
-        $emitter  = $emitter ?: new SapiEmitter();
         $cache    = $cache ?: new FilesystemCache($cacheDir);
         $corsSettings  = $corsSettings ?: $this->getCorsSettings();
         $corsAnalyzer  = $corsAnalyzer ?: Analyzer::instance($corsSettings);
@@ -203,6 +215,60 @@ class Router
             $response->getBody()->write(json_encode($actionsResults, \JSON_UNESCAPED_UNICODE));
         }
 
-        $emitter->emit($response->withHeader('Content-Type', 'application/json'));
+        $this->response = $response->withHeader('Content-Type', 'application/json');
+    }
+
+    /**
+     * Route without CORS. In a middleware application you can use an CORS middleware.
+     *
+     * @param RequestInterface|null $request
+     * @param ResponseInterface|null $response
+     * @param CacheProvider|null $cache
+     * @return array
+     */
+    public function route(RequestInterface $request = null,
+                          ResponseInterface $response = null,
+                          CacheProvider $cache = null)
+    {
+        $cacheDir = $this->config->getCacheDirectory();
+        $cacheKey = $this->config->getApiProperty('id');
+        $cacheLifetime = $this->config->getCacheLifetime();
+
+        $request  = $request ?: ServerRequestFactory::fromGlobals();
+        $response = $response ?: new Response();
+        $cache    = $cache ?: new FilesystemCache($cacheDir);
+
+        if ($cache->contains($cacheKey)) {
+            $classMap = $cache->fetch($cacheKey);
+
+        } else {
+            $discoverer = new Discoverer($this->config);
+            $classMap = $discoverer->parseClasses();
+
+            $cache->save($cacheKey, $classMap, $cacheLifetime);
+        }
+
+        $actionsResults = [];
+
+        // @TODO parse POST method (formAction)
+        // @TODO parse upload
+
+        $actions = $this->getActions($request, $classMap);
+        foreach ($actions as $action) {
+            $actionsResults[] = $action->run();
+        }
+
+        $response->getBody()->write(json_encode($actionsResults, \JSON_UNESCAPED_UNICODE));
+
+        $this->response = $response->withHeader('Content-Type', 'application/json');
+    }
+
+    /**
+     * @param EmitterInterface|null $emitter
+     */
+    public function output(EmitterInterface $emitter = null)
+    {
+        $emitter = $emitter ?: new SapiEmitter();
+        $emitter->emit($this->getResponse());
     }
 }
