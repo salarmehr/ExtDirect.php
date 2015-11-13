@@ -14,8 +14,18 @@ class Server
      * @return bool|string
      * @ExtDirect
      */
-    public function date( $format )
+    public function date($format)
     {
-        return date( $format );
+        return date($format);
+    }
+
+    /**
+     *
+     * @return string
+     * @ExtDirect
+     */
+    public function hostname()
+    {
+        return gethostname();
     }
 }
