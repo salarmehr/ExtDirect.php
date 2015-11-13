@@ -10,7 +10,7 @@ use Zend\Diactoros\Response;
 use Zend\Diactoros\Response\SapiEmitter;
 use Doctrine\Common\Cache\CacheProvider;
 use Doctrine\Common\Cache\FilesystemCache;
-use \Neomerx\Cors\Contracts\Strategies\SettingsStrategyInterface;
+use Neomerx\Cors\Contracts\Strategies\SettingsStrategyInterface;
 use Neomerx\Cors\Strategies\Settings;
 use Neomerx\Cors\Contracts\AnalysisResultInterface;
 use Neomerx\Cors\Contracts\AnalyzerInterface;
