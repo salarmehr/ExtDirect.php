@@ -6,7 +6,7 @@ An PHP implementation of the Sencha Ext Direct Specification
 
 ## Install
     
-    composer require danielbragalmeida/extdirect
+    composer require danielbragaalmeida/extdirect
 
 ## How to Use
 

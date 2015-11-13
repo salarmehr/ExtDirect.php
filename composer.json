@@ -1,5 +1,5 @@
 {
-  "name": "danielbragalmeida/extdirect",
+  "name": "danielbragaalmeida/extdirect",
   "type": "library",
   "description": "An PHP implementation of the Ext Direct Specification",
   "keywords": ["sencha", "extjs", "direct"],
