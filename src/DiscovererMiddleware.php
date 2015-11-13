@@ -1,10 +1,9 @@
 <?php
-namespace Mercatus;
+namespace ExtDirect;
 
 use Zend\Stratigility\MiddlewareInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
-use ExtDirect\Discoverer;
 
 class DiscovererMiddleware implements MiddlewareInterface
 {
