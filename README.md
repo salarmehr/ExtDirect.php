@@ -4,6 +4,10 @@ An PHP implementation of the Sencha Ext Direct Specification
 
 [This project has some code from J. Bruni (ExtDirect.php)](http://www.sencha.com/forum/showthread.php?102357-Extremely-Easy-Ext.Direct-integration-with-PHP)
 
+## Install
+    
+    composer require danielbragalmeida/extdirect
+
 ## How to Use
 
 ### PHP 
