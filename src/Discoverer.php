@@ -85,7 +85,8 @@ class Discoverer
             }
             $method = [
                 'name' => $reflectedMethod->getName(),
-                'len' => $reflectedMethod->getNumberOfParameters()
+                'len' => $reflectedMethod->getNumberOfParameters(),
+                'formHandler' => false
             ];
 
             if (isset($methodAnnotations['ExtDirect\FormHandler'])) {
@@ -126,6 +127,8 @@ class Discoverer
                     continue;
                 }
 
+                $methods = $this->getMethods($class);
+
                 $classAlias = null;
                 if (isset($classAnnotations['ExtDirect\Alias'])) {
                     if (is_array($classAnnotations['ExtDirect\Alias']) &&
@@ -139,24 +142,20 @@ class Discoverer
                 $classMap[$actionName]['action'] = $actionName;
                 $classMap[$actionName]['class'] = $className;
                 $classMap[$actionName]['file'] = $file;
-
-                $actions[$actionName] = $this->getMethods($class);
+                $classMap[$actionName]['methods'] = $methods;
             }
         }
 
-        return [
-            'actions' => $actions,
-            'classMap' => $classMap
-        ];
+        return $classMap;
     }
 
     /**
-     * Get API declaration array
+     * Build API declaration
      *
-     * @param array $actions
+     * @param $classMap
      * @return array
      */
-    public function getApi(array $actions)
+    public function buildApi($classMap)
     {
         $apiCfg = $this->config->getApi()['declaration'];
 
@@ -175,12 +174,15 @@ class Discoverer
             $api['timeout'] = $apiCfg['timeout'];
         }
 
-        $api['actions'] = $actions;
+        foreach($classMap as $actionName => $actionProps) {
+            $api['actions'][$actionName] = $actionProps['methods'];
+        }
 
         return $api;
     }
 
     /**
+     * Start discovery process
      *
      * @param ResponseInterface|null $response
      * @param EmitterInterface|null $emitter
@@ -199,20 +201,14 @@ class Discoverer
         $emitter  = $emitter ?: new SapiEmitter();
         $cache    = $cache ?: new FilesystemCache($cacheDir);
 
-        $parsedData = $this->parseClasses();
-
         if ($cache->contains($cacheKey)) {
-            $cachedData = $cache->fetch($cacheKey);
-
-            $api = $cachedData['api'];
+            $classMap = $cache->fetch($cacheKey);
         } else {
-            $api = $this->getApi($parsedData['actions']);
-
-            $cache->save($cacheKey, [
-                'classMap' => $parsedData['classMap'],
-                'api' => $api
-            ], $cacheLifetime);
+            $classMap = $this->parseClasses();
+            $cache->save($cacheKey, $classMap, $cacheLifetime);
         }
+
+        $api = $this->buildApi($classMap);
 
         $body = sprintf('%s = %s;',
             $this->config->getApiDescriptor(),

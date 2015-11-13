@@ -3,7 +3,6 @@ namespace ExtDirect;
 
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\MessageInterface;
 use Zend\Diactoros\Response\EmitterInterface;
 use Zend\Diactoros\ServerRequestFactory;
 use Zend\Diactoros\Response;
@@ -182,22 +181,13 @@ class Router
 
         if ($corsPassed) {
             if ($cache->contains($cacheKey)) {
-                $cachedData = $cache->fetch($cacheKey);
-
-                //$api = $cachedData['api'];
-                $classMap = $cachedData['classMap'];
+                $classMap = $cache->fetch($cacheKey);
 
             } else {
                 $discoverer = new Discoverer($this->config);
+                $classMap = $discoverer->parseClasses();
 
-                $parsedData = $discoverer->parseClasses();
-                $api = $discoverer->getApi($parsedData['actions']);
-                $classMap = $parsedData['classMap'];
-
-                $cache->save($cacheKey, [
-                    'classMap' => $classMap,
-                    'api' => $api
-                ], $cacheLifetime);
+                $cache->save($cacheKey, $classMap, $cacheLifetime);
             }
 
             $actionsResults = [];
@@ -212,7 +202,7 @@ class Router
 
             $response->getBody()->write(json_encode($actionsResults, \JSON_UNESCAPED_UNICODE));
         }
-        /** @var ResponseInterface $response */
+
         $emitter->emit($response->withHeader('Content-Type', 'application/json'));
     }
 }
