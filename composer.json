@@ -1,0 +1,25 @@
+{
+  "name": "danielbragaalmeida/extdirect",
+  "type": "library",
+  "description": "An PHP implementation of the Ext Direct Specification",
+  "keywords": ["sencha", "extjs", "direct"],
+  "homepage": "http://docs.sencha.com/extjs/6.0/backend_connectors/direct/specification.html",
+  "license": "MIT",
+  "authors": [
+    {"name": "Daniel Braga", "email": "daniel@danielbraga.com"}
+  ],
+  "require": {
+    "php": ">=5.5",
+    "nette/reflection": "^2.3",
+    "zendframework/zend-diactoros": "^1.1",
+    "doctrine/cache": "^1.5",
+    "neomerx/cors-psr7": "^0.2.0",
+    "zendframework/zend-stratigility": "^1.1"
+  },
+  "autoload": {
+    "psr-4": { "ExtDirect\\": "src/" }
+  },
+  "archive": {
+    "exclude": ["/example"]
+  }
+}
