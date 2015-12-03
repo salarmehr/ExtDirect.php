@@ -1,8 +1,8 @@
-# ExtDirect.php
+# ExtDirect.php for ExtJS 6
 Extremely Easy Ext.Direct integration with PHP
 
-
-[Created by: J. Bruni](http://www.sencha.com/forum/showthread.php?102357-Extremely-Easy-Ext.Direct-integration-with-PHP)
+Original author : J. Bruni
+Fork author : D. Kazarin
 
 
 How to use:

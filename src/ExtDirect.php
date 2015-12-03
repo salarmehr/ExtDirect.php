@@ -5,6 +5,7 @@
  * Default values for all boolean configurations is "false" (this is easy to remember)
  * 
  * @author J. Bruni
+ * @fork-author: D. Kazarin
  */
 class ExtDirect
 {
@@ -67,6 +68,11 @@ class ExtDirect
 	 * @var boolean   Set this to true to allow detailed information about exceptions in the output
 	 */
 	static public $debug  = false;
+
+	/**
+	 * @var @https_direct allow get working with https protocol
+	 */
+	 static public $https_direct = false;
 	
 	/**
 	 * @var boolean   Set this to true to pass all action method call results through utf8_encode function
@@ -108,14 +114,17 @@ class ExtDirect
 	 */
 	static public function get_api_array()
 	{
+		$protocol = self::$https_direct ? 'https://' : 'http://';
+
 		$api_array = array(
-			'id'         => self::$id,
-			'url'        => ( empty( self::$url ) ? $_SERVER['PHP_SELF'] : self::$url ),
-			'type'       => 'remoting',
-			'namespace'  => self::$namespace,
-			'descriptor' => self::$descriptor
+			'id'           => self::$id,
+			'url'          => $protocol.$_SERVER['SERVER_NAME'].$_SERVER['PHP_SELF'],
+			'type'         => 'remoting',
+			'enableBuffer' => 10,
+			'namespace'    => self::$namespace,
+			'descriptor'   => self::$descriptor
 		);
-		
+
 		if ( empty( $api_array['id'] ) )
 			unset( $api_array['id'] );
 		
@@ -173,7 +182,7 @@ class ExtDirect
 	 */
 	static public function get_api_json()
 	{
-		return json_encode( self::get_api_array(),JSON_UNESCAPED_UNICODE );
+		return json_encode( self::get_api_array(),JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 	}
 	
 	/**
@@ -186,9 +195,9 @@ class ExtDirect
 if ( Ext.syncRequire )
 	Ext.syncRequire( 'Ext.direct.Manager' );
 
-Ext.namespace( '[%namespace%]' );
+Ext.ns( '[%namespace%]' );
 [%descriptor%] = [%actions%];
-Ext.Direct.addProvider( [%descriptor%] );
+Ext.direct.Manager.addProvider( [%descriptor%] );
 
 JAVASCRIPT;
 		
@@ -218,6 +227,7 @@ JAVASCRIPT;
  * Process Ext.Direct HTTP requests
  * 
  * @author J. Bruni
+ * @fork-author: D. Kazarin
  */
 class ExtDirectRequest
 {
@@ -294,6 +304,7 @@ class ExtDirectRequest
  * Store HTTP response contents for output
  * 
  * @author J. Bruni
+ * @fork-author: D. Kazarin
  */
 class ExtDirectResponse
 {
@@ -312,6 +323,7 @@ class ExtDirectResponse
  * Call a Ext.Direct API class method and format the results
  * 
  * @author J. Bruni
+ * @fork-author: D. Kazarin
  */
 class ExtDirectAction
 {
@@ -555,6 +567,7 @@ class ExtDirectAction
  * Ext.Direct API controller
  * 
  * @author J. Bruni
+ * @fork-author: D. Kazarin
  */
 class ExtDirectController
 {
@@ -616,9 +629,9 @@ class ExtDirectController
 				$response[] = $action->run();
 			
 			if ( count( $response ) > 1 )
-				$this->response->contents = json_encode( $response,JSON_UNESCAPED_UNICODE );
+				$this->response->contents = json_encode( $response,JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 			else
-				$this->response->contents = json_encode( $response[0],JSON_UNESCAPED_UNICODE );
+				$this->response->contents = json_encode( $response[0],JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 			
 			if ( $this->request->upload )
 				$this->response->contents = '<html><body><textarea>' . preg_replace( '/&quot;/', '\\&quot;', $this->response->contents ) . '</textarea></body></html>';
