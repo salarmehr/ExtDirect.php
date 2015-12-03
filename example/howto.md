@@ -23,10 +23,14 @@ Hello, how run the example ? ? ?
         }
     ]
     
-....
+.....
 
 6. All Done, now you can test Ext.Direct. Call Ext.php.Server.date() in you application for test, example down below
+
+.....
 
     Ext.php.Server.date( 'Y-m-d', function(result) {
         alert( 'Server date is ' + result ); } );
     };
+    
+.....
